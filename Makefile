@@ -1,4 +1,4 @@
-.PHONY: fmt fmt-json fmt-terraform fmt-whitespace lint
+.PHONY: fmt fmt-json fmt-terraform fmt-whitespace lint visualize
 
 # Fix all formatting issues in one shot.
 fmt: fmt-whitespace fmt-json fmt-terraform
@@ -80,3 +80,9 @@ lint-refs:
 	]; \
 	print('    All cross-references valid.') if ok else sys.exit(1); \
 	"
+
+# Build the force-directed governance visualizer to dist/index.html.
+visualize:
+	@echo "==> Building visualizer..."
+	@cd visualizer && npm install --silent && npm run build
+	@echo "    Output: dist/index.html"

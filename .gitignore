@@ -35,3 +35,9 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Visualizer build output
+dist/
+
+# Node.js
+node_modules/

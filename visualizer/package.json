@@ -1,0 +1,14 @@
+{
+  "name": "golden-retriever-visualizer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Force-directed graph visualization of governance data",
+  "type": "module",
+  "scripts": {
+    "build": "tsx src/build.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
