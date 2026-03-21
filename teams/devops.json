@@ -1,0 +1,24 @@
+{
+  "name": "DevOps",
+  "slug": "devops",
+  "description": "DevOps is a team that works on team management, hosting, and storage systems for almost all projects. We work in close cooperation with other teams to set up the features they need to run their projects.",
+  "maintainers": [
+    "thesuperRL",
+    "ap-1",
+    "Yuxiang-Huang"
+  ],
+  "contributors": [
+    "thesuperRL",
+    "ap-1",
+    "Yuxiang-Huang",
+    "Gostmeaper"
+  ],
+  "repos": [
+    "governance",
+    "golden-retriever",
+    "infrastructure"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": false
+}

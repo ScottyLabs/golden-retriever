@@ -1,0 +1,183 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-editorconfig:
+    name: Check EditorConfig Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install EditorConfig Checker
+        uses: taiki-e/install-action@v2
+        with:
+          tool: editorconfig-checker
+          fallback: none
+
+      - name: Check EditorConfig Compliance
+        run: editorconfig-checker --exclude LICENSE --exclude .terraform
+
+  validate-json:
+    name: Validate JSON Files
+    needs: validate-editorconfig
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install ajv-cli
+        run: npm install -g ajv-cli ajv-formats
+
+      - name: Check JSON syntax
+        run: |
+          exit_code=0
+          for f in contributors/*.json repos/*.json teams/*.json; do
+            [ -f "$f" ] || continue
+            if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
+              echo "::error file=$f::Invalid JSON syntax"
+              exit_code=1
+            fi
+          done
+          exit $exit_code
+
+      - name: Validate contributors against schema
+        run: |
+          shopt -s nullglob
+          files=(contributors/*.json)
+          if [ ${#files[@]} -gt 0 ]; then
+            ajv validate -s schemas/contributor.schema.json -d "contributors/*.json" --strict=false
+          fi
+
+      - name: Validate repositories against schema
+        run: |
+          shopt -s nullglob
+          files=(repos/*.json)
+          if [ ${#files[@]} -gt 0 ]; then
+            ajv validate -s schemas/repository.schema.json -d "repos/*.json" --strict=false
+          fi
+
+      - name: Validate teams against schema
+        run: |
+          shopt -s nullglob
+          files=(teams/*.json)
+          if [ ${#files[@]} -gt 0 ]; then
+            ajv validate -s schemas/team.schema.json -d "teams/*.json" --strict=false
+          fi
+
+  validate-terraform:
+    name: Validate Terraform
+    needs: validate-json
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive -diff
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  validate-references:
+    name: Validate Cross-References
+    needs: validate-json
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check that team member and repo references are valid
+        run: |
+          exit_code=0
+
+          for team_file in teams/*.json; do
+            [ -f "$team_file" ] || continue
+            team_slug=$(basename "$team_file" .json)
+
+            # Check slug matches filename
+            file_slug=$(python3 -c "import json; print(json.load(open('$team_file'))['slug'])")
+            if [ "$file_slug" != "$team_slug" ]; then
+              echo "::error file=$team_file::slug '$file_slug' does not match filename '$team_slug'"
+              exit_code=1
+            fi
+
+            # Check all contributors reference existing contributor files
+            for contributor in $(python3 -c "import json; [print(c) for c in json.load(open('$team_file')).get('contributors', [])]"); do
+              if [ ! -f "contributors/$contributor.json" ]; then
+                echo "::error file=$team_file::contributor '$contributor' has no file at contributors/$contributor.json"
+                exit_code=1
+              fi
+            done
+
+            # Check all maintainers reference existing contributor files
+            for maintainer in $(python3 -c "import json; [print(m) for m in json.load(open('$team_file')).get('maintainers', [])]"); do
+              if [ ! -f "contributors/$maintainer.json" ]; then
+                echo "::error file=$team_file::maintainer '$maintainer' has no file at contributors/$maintainer.json"
+                exit_code=1
+              fi
+            done
+
+            # Check all maintainers are also listed as contributors
+            python3 -c "
+          import json, sys
+          team = json.load(open('$team_file'))
+          maintainers = set(team.get('maintainers', []))
+          contributors = set(team.get('contributors', []))
+          missing = maintainers - contributors
+          for m in missing:
+              print(f'::error file=$team_file::maintainer \"{m}\" must also be listed in contributors')
+              sys.exit(1)
+          "
+
+            # Check all repos reference existing repo files
+            for repo in $(python3 -c "import json; [print(r) for r in json.load(open('$team_file')).get('repos', [])]"); do
+              if [ ! -f "repos/$repo.json" ]; then
+                echo "::error file=$team_file::repo '$repo' has no file at repos/$repo.json"
+                exit_code=1
+              fi
+            done
+          done
+
+          # Check contributor slug matches filename
+          for contrib_file in contributors/*.json; do
+            [ -f "$contrib_file" ] || continue
+            expected=$(basename "$contrib_file" .json)
+            github_user=$(python3 -c "import json; print(json.load(open('$contrib_file')).get('github_username', ''))")
+            if [ -n "$github_user" ] && [ "$github_user" != "$expected" ]; then
+              echo "::warning file=$contrib_file::github_username '$github_user' does not match filename '$expected'"
+            fi
+          done
+
+          # Check repo slug matches filename
+          for repo_file in repos/*.json; do
+            [ -f "$repo_file" ] || continue
+            expected=$(basename "$repo_file" .json)
+            file_slug=$(python3 -c "import json; print(json.load(open('$repo_file'))['slug'])")
+            if [ "$file_slug" != "$expected" ]; then
+              echo "::error file=$repo_file::slug '$file_slug' does not match filename '$expected'"
+              exit_code=1
+            fi
+          done
+
+          exit $exit_code

@@ -1,0 +1,68 @@
+name: Validate PR Requirements
+
+on:
+  pull_request:
+
+jobs:
+  validate-requirements:
+    name: Validate PR Requirements
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            contributors/**
+            teams/**
+            repos/**
+
+      - name: Make scripts executable
+        run: |
+          chmod +x .github/scripts/validate-contributor.sh
+          chmod +x .github/scripts/validate-team.sh
+          chmod +x .github/scripts/validate-single-file-change.sh
+
+      - name: Validate contributor self-nomination
+        if: contains(steps.changed-files.outputs.added_files, 'contributors/')
+        run: |
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          for FILE in ${{ steps.changed-files.outputs.added_files }}; do
+            if [[ "$FILE" == contributors/*.json ]]; then
+              .github/scripts/validate-contributor.sh "$PR_AUTHOR" "$FILE"
+            fi
+          done
+
+      - name: Validate team creator is a maintainer
+        if: contains(steps.changed-files.outputs.added_files, 'teams/')
+        run: |
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          for FILE in ${{ steps.changed-files.outputs.added_files }}; do
+            if [[ "$FILE" == teams/*.json ]]; then
+              .github/scripts/validate-team.sh "$PR_AUTHOR" "$FILE"
+            fi
+          done
+
+      - name: Validate at most one contributor file is changed
+        if: contains(steps.changed-files.outputs.all_changed_files, 'contributors/')
+        run: |
+          .github/scripts/validate-single-file-change.sh \
+            "contributors/" \
+            "${{ steps.changed-files.outputs.all_changed_files }}"
+
+      - name: Validate at most one team file is changed
+        if: contains(steps.changed-files.outputs.all_changed_files, 'teams/')
+        run: |
+          .github/scripts/validate-single-file-change.sh \
+            "teams/" \
+            "${{ steps.changed-files.outputs.all_changed_files }}"
+
+      - name: Validate at most one repo file is changed
+        if: contains(steps.changed-files.outputs.all_changed_files, 'repos/')
+        run: |
+          .github/scripts/validate-single-file-change.sh \
+            "repos/" \
+            "${{ steps.changed-files.outputs.all_changed_files }}"

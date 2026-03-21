@@ -1,0 +1,6 @@
+{
+  "name": "Golden Retriever",
+  "slug": "golden-retriever",
+  "description": "Terraform-based governance for managing contributors, teams, and repository access.",
+  "github": "ScottyLabs/golden-retriever"
+}

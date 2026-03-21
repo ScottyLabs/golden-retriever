@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "team.schema.json",
+  "title": "Team",
+  "description": "Schema for a team registration file.",
+  "type": "object",
+  "required": ["name", "slug", "maintainers", "contributors"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable team name."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$",
+      "description": "URL-safe identifier. Must match the filename (without .json)."
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description of the team or project."
+    },
+    "maintainers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Contributor filenames (without .json) who are maintainers. Maintainers receive elevated repository permissions and team management rights."
+    },
+    "contributors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "Contributor filenames (without .json) who are contributors. All maintainers should also appear here."
+    },
+    "repos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$"
+      },
+      "uniqueItems": true,
+      "description": "Repository filenames (without .json) from the repos/ directory. Platform-specific details are defined in each repository file."
+    },
+    "sync_github": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, automatically sync team membership and repo access to GitHub."
+    },
+    "sync_forgejo": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, automatically sync team membership and repo access to Forgejo/Codeberg."
+    },
+    "remove_unlisted": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, members not listed in this file will be removed from the platform team. Set to false during migration periods."
+    }
+  },
+  "additionalProperties": false
+}
