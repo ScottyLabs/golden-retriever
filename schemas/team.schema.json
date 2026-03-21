@@ -4,7 +4,12 @@
   "title": "Team",
   "description": "Schema for a team registration file.",
   "type": "object",
-  "required": ["name", "slug", "maintainers", "contributors"],
+  "required": [
+    "name",
+    "slug",
+    "maintainers",
+    "contributors"
+  ],
   "properties": {
     "name": {
       "type": "string",
@@ -21,14 +26,18 @@
     },
     "maintainers": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "minItems": 1,
       "uniqueItems": true,
       "description": "Contributor filenames (without .json) who are maintainers. Maintainers receive elevated repository permissions and team management rights."
     },
     "contributors": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "uniqueItems": true,
       "description": "Contributor filenames (without .json) who are contributors. All maintainers should also appear here."
     },

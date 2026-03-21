@@ -4,7 +4,9 @@
   "title": "Contributor",
   "description": "Schema for a contributor registration file.",
   "type": "object",
-  "required": ["full_name"],
+  "required": [
+    "full_name"
+  ],
   "properties": {
     "full_name": {
       "type": "string",

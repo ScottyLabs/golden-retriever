@@ -4,10 +4,21 @@
   "title": "Repository",
   "description": "Schema for a repository registration file.",
   "type": "object",
-  "required": ["name", "slug"],
+  "required": [
+    "name",
+    "slug"
+  ],
   "anyOf": [
-    { "required": ["github"] },
-    { "required": ["forgejo"] }
+    {
+      "required": [
+        "github"
+      ]
+    },
+    {
+      "required": [
+        "forgejo"
+      ]
+    }
   ],
   "properties": {
     "name": {
