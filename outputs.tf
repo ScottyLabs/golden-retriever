@@ -29,3 +29,8 @@ output "team_count" {
   description = "Total number of registered teams."
   value       = length(local.teams)
 }
+
+output "figma_project_count" {
+  description = "Total number of registered Figma projects."
+  value       = length(local.figma_projects)
+}

@@ -1,15 +1,16 @@
 # golden-retriever
 
-Terraform-based governance system for managing contributors, teams, and repository access across **GitHub** and **Forgejo** (Codeberg).
+Terraform-based governance system for managing contributors, teams, and repository access across **GitHub** and **Forgejo** (Codeberg), with **Figma** project tracking.
 
-Members, repositories, and teams register themselves by adding JSON files to this repository. When applied, Terraform automatically syncs team memberships and repository permissions to the configured platforms.
+Members, repositories, Figma projects, and teams register themselves by adding JSON files to this repository. When applied, Terraform automatically syncs team memberships and repository permissions to the configured platforms. Figma projects are tracked for reference and verified via the Figma API in CI.
 
 ## How it works
 
 1. **Contributors** add a JSON file to [`contributors/`](contributors/README.md) with their profile info.
 2. **Repositories** add a JSON file to [`repos/`](repos/README.md) declaring which platforms they live on.
-3. **Teams** add a JSON file to [`teams/`](teams/README.md) listing their members, maintainers, and repo slugs.
-4. Terraform reads every JSON file, builds the desired state, and reconciles it with GitHub and/or Forgejo.
+3. **Figma projects** add a JSON file to [`figma-projects/`](figma-projects/README.md) with their Figma team and project IDs.
+4. **Teams** add a JSON file to [`teams/`](teams/README.md) listing their members, maintainers, repo slugs, and Figma project slugs.
+5. Terraform reads every JSON file, builds the desired state, and reconciles it with GitHub and/or Forgejo. Figma projects are verified via the read-only Figma API.
 
 ### Permission model
 
@@ -63,7 +64,23 @@ Create `repos/<slug>.json`:
 
 A repo can live on one or both platforms — just include the fields that apply.
 
-### 3. Register a team
+### 3. Register a Figma project (optional)
+
+Create `figma-projects/<slug>.json`:
+
+```json
+{
+  "name": "My Project Designs",
+  "slug": "my-project-designs",
+  "figma_team_id": "123456789",
+  "figma_project_id": "987654321",
+  "url": "https://www.figma.com/files/team/123456789/project/987654321"
+}
+```
+
+> **Note:** The Figma API is read-only for permissions. CI will verify the project exists, but access must be granted manually in Figma.
+
+### 4. Register a team
 
 Create `teams/<slug>.json`:
 
@@ -75,12 +92,13 @@ Create `teams/<slug>.json`:
   "maintainers": ["janedoe"],
   "contributors": ["janedoe", "bobsmith"],
   "repos": ["my-project"],
+  "figma_projects": ["my-project-designs"],
   "sync_github": true,
   "sync_forgejo": false
 }
 ```
 
-### 4. Apply
+### 5. Apply
 
 ```bash
 export GITHUB_TOKEN="ghp_..."
@@ -112,12 +130,16 @@ golden-retriever/
 ├── README.md
 ├── schemas/
 │   ├── contributor.schema.json
+│   ├── figma-project.schema.json
 │   ├── repository.schema.json
 │   └── team.schema.json
 ├── contributors/
 │   ├── README.md
 │   └── <username>.json
 ├── repos/
+│   ├── README.md
+│   └── <slug>.json
+├── figma-projects/
 │   ├── README.md
 │   └── <slug>.json
 ├── teams/
@@ -147,5 +169,6 @@ Validate all data files against the schemas in [`schemas/`](schemas/):
 # Using ajv-cli or any JSON Schema validator
 npx ajv validate -s schemas/contributor.schema.json -d "contributors/*.json"
 npx ajv validate -s schemas/repository.schema.json -d "repos/*.json"
+npx ajv validate -s schemas/figma-project.schema.json -d "figma-projects/*.json"
 npx ajv validate -s schemas/team.schema.json -d "teams/*.json"
 ```

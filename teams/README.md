@@ -20,6 +20,9 @@ Create a new JSON file in `teams/` with the team slug as the filename, e.g. `my-
     "my-project",
     "my-project-docs"
   ],
+  "figma_projects": [
+    "my-project-designs"
+  ],
   "sync_github": true,
   "sync_forgejo": false,
   "remove_unlisted": true
@@ -36,6 +39,7 @@ Create a new JSON file in `teams/` with the team slug as the filename, e.g. `my-
 | `maintainers` | string[] | yes | — | Contributor filenames (without `.json`). At least one required. Maintainers receive elevated repo permissions and can manage team membership. |
 | `contributors` | string[] | yes | — | Contributor filenames (without `.json`). All maintainers should also be listed here. |
 | `repos` | string[] | no | `[]` | Repository filenames (without `.json`) from [`repos/`](../repos/README.md). Platform details are defined in each repo file. |
+| `figma_projects` | string[] | no | `[]` | Figma project filenames (without `.json`) from [`figma-projects/`](../figma-projects/README.md). |
 | `sync_github` | boolean | no | `true` | Automatically sync membership and repo access to GitHub. |
 | `sync_forgejo` | boolean | no | `false` | Automatically sync membership and repo access to Forgejo/Codeberg. |
 | `remove_unlisted` | boolean | no | `true` | Remove members not listed in this file from the platform team. Set `false` during migration. |

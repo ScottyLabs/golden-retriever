@@ -18,6 +18,9 @@
     "golden-retriever",
     "infrastructure"
   ],
+  "figma_projects": [
+    "devops-designs"
+  ],
   "sync_github": false,
   "sync_forgejo": false,
   "remove_unlisted": false

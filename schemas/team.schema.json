@@ -50,6 +50,15 @@
       "uniqueItems": true,
       "description": "Repository filenames (without .json) from the repos/ directory. Platform-specific details are defined in each repository file."
     },
+    "figma_projects": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$"
+      },
+      "uniqueItems": true,
+      "description": "Figma project filenames (without .json) from the figma-projects/ directory."
+    },
     "sync_github": {
       "type": "boolean",
       "default": true,

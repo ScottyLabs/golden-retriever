@@ -20,6 +20,16 @@ locals {
   }
 
   # ---------------------------------------------------------------------------
+  # Load Figma project JSON files
+  # ---------------------------------------------------------------------------
+  figma_project_files = fileset("${path.module}/figma-projects", "*.json")
+
+  figma_projects = {
+    for f in local.figma_project_files :
+    trimsuffix(f, ".json") => jsondecode(file("${path.module}/figma-projects/${f}"))
+  }
+
+  # ---------------------------------------------------------------------------
   # Load team JSON files
   # ---------------------------------------------------------------------------
   team_files = fileset("${path.module}/teams", "*.json")

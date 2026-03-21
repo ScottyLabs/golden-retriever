@@ -47,7 +47,7 @@ jobs:
       - name: Check JSON syntax
         run: |
           exit_code=0
-          for f in contributors/*.json repos/*.json teams/*.json; do
+          for f in contributors/*.json repos/*.json figma-projects/*.json teams/*.json; do
             [ -f "$f" ] || continue
             if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
               echo "::error file=$f::Invalid JSON syntax"
@@ -70,6 +70,14 @@ jobs:
           files=(repos/*.json)
           if [ ${#files[@]} -gt 0 ]; then
             ajv validate -s schemas/repository.schema.json -d "repos/*.json" --strict=false
+          fi
+
+      - name: Validate Figma projects against schema
+        run: |
+          shopt -s nullglob
+          files=(figma-projects/*.json)
+          if [ ${#files[@]} -gt 0 ]; then
+            ajv validate -s schemas/figma-project.schema.json -d "figma-projects/*.json" --strict=false
           fi
 
       - name: Validate teams against schema
@@ -158,6 +166,14 @@ jobs:
                 exit_code=1
               fi
             done
+
+            # Check all figma_projects reference existing figma-project files
+            for fp in $(python3 -c "import json; [print(p) for p in json.load(open('$team_file')).get('figma_projects', [])]"); do
+              if [ ! -f "figma-projects/$fp.json" ]; then
+                echo "::error file=$team_file::figma_project '$fp' has no file at figma-projects/$fp.json"
+                exit_code=1
+              fi
+            done
           done
 
           # Check contributor slug matches filename
@@ -181,4 +197,49 @@ jobs:
             fi
           done
 
+          # Check figma-project slug matches filename
+          for fp_file in figma-projects/*.json; do
+            [ -f "$fp_file" ] || continue
+            expected=$(basename "$fp_file" .json)
+            file_slug=$(python3 -c "import json; print(json.load(open('$fp_file'))['slug'])")
+            if [ "$file_slug" != "$expected" ]; then
+              echo "::error file=$fp_file::slug '$file_slug' does not match filename '$expected'"
+              exit_code=1
+            fi
+          done
+
+          exit $exit_code
+
+  validate-figma:
+    name: Verify Figma Projects
+    needs: validate-references
+    if: vars.FIGMA_TOKEN != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify Figma project IDs exist
+        env:
+          FIGMA_TOKEN: ${{ vars.FIGMA_TOKEN }}
+        run: |
+          exit_code=0
+          for fp_file in figma-projects/*.json; do
+            [ -f "$fp_file" ] || continue
+            slug=$(basename "$fp_file" .json)
+            project_id=$(python3 -c "import json; print(json.load(open('$fp_file'))['figma_project_id'])")
+
+            status=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "X-Figma-Token: $FIGMA_TOKEN" \
+              "https://api.figma.com/v1/projects/$project_id/files")
+
+            if [ "$status" = "200" ]; then
+              echo "OK: $slug (project $project_id)"
+            elif [ "$status" = "403" ]; then
+              echo "::warning file=$fp_file::Figma project $project_id exists but token lacks access"
+            else
+              echo "::error file=$fp_file::Figma project $project_id returned HTTP $status (not found or invalid)"
+              exit_code=1
+            fi
+          done
           exit $exit_code

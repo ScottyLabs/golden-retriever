@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "figma-project.schema.json",
+  "title": "Figma Project",
+  "description": "Schema for a Figma project registration file.",
+  "type": "object",
+  "required": [
+    "name",
+    "slug",
+    "figma_team_id",
+    "figma_project_id"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable project name."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$",
+      "description": "URL-safe identifier. Must match the filename (without .json)."
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description of the Figma project."
+    },
+    "figma_team_id": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Numeric Figma team ID. Found in the URL: figma.com/files/team/<team_id>/..."
+    },
+    "figma_project_id": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Numeric Figma project ID. Found in the URL: figma.com/files/team/.../project/<project_id>/..."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Direct URL to the Figma project (for convenience)."
+    }
+  },
+  "additionalProperties": false
+}
