@@ -17,8 +17,37 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-credentials:
+    name: Check Credentials
+    runs-on: ubuntu-latest
+    outputs:
+      has_github: ${{ steps.check.outputs.has_github }}
+      has_forgejo: ${{ steps.check.outputs.has_forgejo }}
+      has_any: ${{ steps.check.outputs.has_any }}
+    steps:
+      - name: Check available credentials
+        id: check
+        run: |
+          has_github="false"
+          has_forgejo="false"
+          if [ -n "${{ secrets.SYNC_GITHUB_TOKEN }}" ]; then
+            has_github="true"
+          fi
+          if [ -n "${{ secrets.FORGEJO_API_TOKEN }}" ]; then
+            has_forgejo="true"
+          fi
+          has_any="false"
+          if [ "$has_github" = "true" ] || [ "$has_forgejo" = "true" ]; then
+            has_any="true"
+          fi
+          echo "has_github=$has_github" >> "$GITHUB_OUTPUT"
+          echo "has_forgejo=$has_forgejo" >> "$GITHUB_OUTPUT"
+          echo "has_any=$has_any" >> "$GITHUB_OUTPUT"
+
   sync:
     name: Terraform Apply
+    needs: check-credentials
+    if: needs.check-credentials.outputs.has_any == 'true'
     runs-on: ubuntu-latest
 
     env:
@@ -30,10 +59,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
 
       - name: Terraform Init
         run: terraform init
@@ -43,3 +72,14 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -input=false tfplan
+
+  skip-sync:
+    name: Skip (no credentials)
+    needs: check-credentials
+    if: needs.check-credentials.outputs.has_any != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: No credentials configured
+        run: |
+          echo "::warning::No SYNC_GITHUB_TOKEN or FORGEJO_API_TOKEN secrets configured. Skipping sync."
+          echo "Configure repository secrets to enable automatic synchronization."
