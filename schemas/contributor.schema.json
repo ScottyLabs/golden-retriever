@@ -20,6 +20,21 @@
     "forgejo_username": {
       "type": "string",
       "description": "Forgejo/Codeberg username. Required if the contributor participates in any Forgejo-synced team."
+    },
+    "slack_user_id": {
+      "type": "string",
+      "pattern": "^U[A-Z0-9]+$",
+      "description": "Slack member ID (e.g. U0123456789). Found via profile > three dots > Copy member ID."
+    },
+    "discord_id": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Discord user ID (numeric). Found via Settings > Advanced > Developer Mode, then right-click your name > Copy User ID."
+    },
+    "matrix_id": {
+      "type": "string",
+      "pattern": "^@[^:]+:.+$",
+      "description": "Matrix/Element user ID in @user:server format (e.g. @alice:matrix.org)."
     }
   },
   "additionalProperties": false
