@@ -69,7 +69,7 @@
       right: 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     #controls label {
@@ -92,9 +92,32 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%238b949e' stroke-width='1.5'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 8px center;
+      width: 100%;
     }
 
     #controls select:hover { border-color: #58a6ff; }
+
+    .control-group { display: flex; flex-direction: column; gap: 4px; }
+
+    #filter-hint {
+      font-size: 11px;
+      color: #8b949e;
+      line-height: 1.4;
+      max-width: 200px;
+    }
+
+    #reset-btn {
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      display: none;
+    }
+
+    #reset-btn:hover { background: #30363d; border-color: #58a6ff; }
 
     #tooltip {
       position: absolute;
@@ -144,11 +167,23 @@
 </div>
 
 <div id="controls" class="overlay">
-  <label for="view-select">View</label>
-  <select id="view-select">
-    <option value="default">All Relationships</option>
-    <option value="people">People Only</option>
-  </select>
+  <div class="control-group">
+    <label for="view-select">View</label>
+    <select id="view-select">
+      <option value="default">All Relationships</option>
+      <option value="people">People Only</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <label for="filter-select">Click Filter</label>
+    <select id="filter-select">
+      <option value="none">None (open link)</option>
+      <option value="local">Local (neighbors)</option>
+      <option value="tree">Tree (subtree)</option>
+    </select>
+    <div id="filter-hint">Click a node to filter.</div>
+  </div>
+  <button id="reset-btn">Reset Filter</button>
 </div>
 
 <div id="tooltip">
@@ -181,9 +216,123 @@
     member: [4, 2]
   };
 
+  var LEADERSHIP_ID = "team:leadership";
+
+  var currentView = "default";
+  var currentFilter = "none";
+  var isFiltered = false;
+
   var tooltip = document.getElementById("tooltip");
   var ttName = tooltip.querySelector(".tt-name");
   var ttType = tooltip.querySelector(".tt-type");
+  var resetBtn = document.getElementById("reset-btn");
+  var filterHint = document.getElementById("filter-hint");
+
+  function linkId(link, prop) {
+    var v = link[prop];
+    return typeof v === "object" ? v.id : v;
+  }
+
+  // Build adjacency from a dataset for tree traversal
+  function buildAdj(data) {
+    var adj = {};
+    data.nodes.forEach(function (n) { adj[n.id] = []; });
+    data.links.forEach(function (l) {
+      var s = linkId(l, "source");
+      var t = linkId(l, "target");
+      if (!adj[s]) adj[s] = [];
+      if (!adj[t]) adj[t] = [];
+      adj[s].push({ neighbor: t, link: l });
+      adj[t].push({ neighbor: s, link: l });
+    });
+    return adj;
+  }
+
+  // Local filter: node + immediate neighbors
+  function filterLocal(data, nodeId) {
+    var adj = buildAdj(data);
+    var keep = {};
+    keep[nodeId] = true;
+    (adj[nodeId] || []).forEach(function (e) { keep[e.neighbor] = true; });
+
+    var nodes = data.nodes.filter(function (n) { return keep[n.id]; });
+    var links = data.links.filter(function (l) {
+      return keep[linkId(l, "source")] && keep[linkId(l, "target")];
+    });
+    return { nodes: nodes, links: links };
+  }
+
+  // Tree filter: two phases —
+  //  1. Walk the BFS spanning-tree path from leadership down to the clicked node
+  //  2. BFS downward from the clicked node (only equal/greater depth) for the subtree
+  // All original edges between included nodes are shown.
+  function filterTree(data, nodeId) {
+    var adj = buildAdj(data);
+
+    var root = adj[LEADERSHIP_ID] ? LEADERSHIP_ID : null;
+    if (!root) return filterLocal(data, nodeId);
+
+    // BFS from leadership: assign depth + record spanning-tree parent
+    var depth = {};
+    var parent = {};
+    var bfsQueue = [root];
+    depth[root] = 0;
+    while (bfsQueue.length > 0) {
+      var cur = bfsQueue.shift();
+      (adj[cur] || []).forEach(function (e) {
+        if (depth[e.neighbor] === undefined) {
+          depth[e.neighbor] = depth[cur] + 1;
+          parent[e.neighbor] = cur;
+          bfsQueue.push(e.neighbor);
+        }
+      });
+    }
+
+    if (depth[nodeId] === undefined) return filterLocal(data, nodeId);
+
+    var keep = {};
+    var clickedDepth = depth[nodeId];
+
+    // Phase 1: reverse BFS from clicked node upward (strictly less depth)
+    // to find ALL ancestor nodes on any path from leadership, not just one
+    var upQueue = [nodeId];
+    keep[nodeId] = true;
+    while (upQueue.length > 0) {
+      var u = upQueue.shift();
+      (adj[u] || []).forEach(function (e) {
+        if (!keep[e.neighbor] && depth[e.neighbor] !== undefined &&
+            depth[e.neighbor] < depth[u]) {
+          keep[e.neighbor] = true;
+          upQueue.push(e.neighbor);
+        }
+      });
+    }
+
+    // Phase 2: BFS downward from clicked node (equal/greater depth)
+    var subQueue = [nodeId];
+    while (subQueue.length > 0) {
+      var n = subQueue.shift();
+      (adj[n] || []).forEach(function (e) {
+        if (!keep[e.neighbor] && depth[e.neighbor] !== undefined &&
+            depth[e.neighbor] >= depth[n]) {
+          keep[e.neighbor] = true;
+          subQueue.push(e.neighbor);
+        }
+      });
+    }
+
+    var nodes = data.nodes.filter(function (n) { return keep[n.id]; });
+    var links = data.links.filter(function (l) {
+      var s = linkId(l, "source");
+      var t = linkId(l, "target");
+      return keep[s] && keep[t];
+    });
+    return { nodes: nodes, links: links };
+  }
+
+  function getBaseData() {
+    return datasets[currentView];
+  }
 
   var graph = ForceGraph()(document.getElementById("graph"))
     .backgroundColor("#0d1117")
@@ -201,8 +350,9 @@
         return src === node.id || tgt === node.id;
       }).length;
 
-      var baseSize = node.nodeType === "Team" ? 8 : 5;
-      var r = baseSize + connectionCount * 1.2;
+      var isLeadership = node.id === LEADERSHIP_ID;
+      var baseSize = isLeadership ? 20 : (node.nodeType === "Team" ? 8 : 5);
+      var r = baseSize + connectionCount * (isLeadership ? 0.4 : 1.2);
 
       ctx.beginPath();
       ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
@@ -234,7 +384,7 @@
       ctx.fillStyle = color;
       ctx.fill();
     })
-    .onNodeHover(function (node, prevNode) {
+    .onNodeHover(function (node) {
       document.body.style.cursor = node ? "pointer" : "default";
       if (node) {
         ttName.textContent = node.name;
@@ -245,7 +395,27 @@
       }
     })
     .onNodeClick(function (node) {
-      if (node.url) window.open(node.url, "_blank");
+      if (currentFilter === "none") {
+        if (node.url) window.open(node.url, "_blank");
+        return;
+      }
+
+      var base = getBaseData();
+      var filtered;
+      if (currentFilter === "local") {
+        filtered = filterLocal(base, node.id);
+      } else if (currentFilter === "tree") {
+        filtered = filterTree(base, node.id);
+      }
+
+      if (filtered && filtered.nodes.length > 0) {
+        graph.graphData(filtered);
+        pinLeadership();
+        graph.d3ReheatSimulation();
+        isFiltered = true;
+        resetBtn.style.display = "block";
+        filterHint.textContent = "Showing: " + node.name;
+      }
     });
 
   document.getElementById("graph").addEventListener("mousemove", function (e) {
@@ -259,15 +429,50 @@
   graph.d3Force("charge").strength(-200);
   graph.d3Force("link").distance(80);
 
-  function updateGraph(key) {
-    graph.graphData(datasets[key]);
-    graph.d3ReheatSimulation();
+  function pinLeadership() {
+    var data = graph.graphData();
+    data.nodes.forEach(function (n) {
+      if (n.id === LEADERSHIP_ID) {
+        n.fx = 0;
+        n.fy = -200;
+      }
+    });
   }
 
-  updateGraph("default");
+  function showFullView() {
+    graph.graphData(getBaseData());
+    pinLeadership();
+    graph.d3ReheatSimulation();
+    isFiltered = false;
+    resetBtn.style.display = "none";
+    filterHint.textContent = "Click a node to filter.";
+  }
+
+  showFullView();
 
   document.getElementById("view-select").addEventListener("change", function (e) {
-    updateGraph(e.target.value);
+    currentView = e.target.value;
+    showFullView();
+  });
+
+  document.getElementById("filter-select").addEventListener("change", function (e) {
+    currentFilter = e.target.value;
+    if (currentFilter === "none") {
+      filterHint.textContent = "";
+      showFullView();
+    } else if (currentFilter === "local") {
+      filterHint.textContent = "Click a node to see neighbors.";
+      if (isFiltered) showFullView();
+    } else if (currentFilter === "tree") {
+      filterHint.textContent = "Click a node to see its subtree.";
+      if (isFiltered) showFullView();
+    }
+  });
+
+  resetBtn.addEventListener("click", function () {
+    showFullView();
+    if (currentFilter === "local") filterHint.textContent = "Click a node to see neighbors.";
+    else if (currentFilter === "tree") filterHint.textContent = "Click a node to see its subtree.";
   });
 })();
 </script>
