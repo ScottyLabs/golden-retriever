@@ -155,6 +155,7 @@
 
 <div id="legend" class="overlay">
   <h3>Legend</h3>
+  <div class="legend-item"><span class="legend-dot" style="background:#C41230"></span> Leadership</div>
   <div class="legend-item"><span class="legend-dot" style="background:#58a6ff"></span> Team</div>
   <div class="legend-item"><span class="legend-dot" style="background:#3fb950"></span> Contributor</div>
   <div class="legend-item"><span class="legend-dot" style="background:#bc8cff"></span> Repository</div>
@@ -356,7 +357,7 @@
 
       ctx.beginPath();
       ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
-      ctx.fillStyle = NODE_COLORS[node.nodeType] || "#c9d1d9";
+      ctx.fillStyle = node.id === LEADERSHIP_ID ? "#941120" : (NODE_COLORS[node.nodeType] || "#c9d1d9");
       ctx.fill();
 
       var label = node.name;
@@ -395,6 +396,33 @@
       }
     })
     .onNodeClick(function (node) {
+      // Clicking leadership reverts to full view
+      if (node.id === LEADERSHIP_ID) {
+        currentFilter = "none";
+        document.getElementById("filter-select").value = "none";
+        filterHint.textContent = "";
+        showFullView();
+        return;
+      }
+
+      // Clicking a team node always opens tree view for that team
+      if (node.nodeType === "Team") {
+        currentFilter = "tree";
+        document.getElementById("filter-select").value = "tree";
+        var base = getBaseData();
+        var filtered = filterTree(base, node.id);
+        if (filtered && filtered.nodes.length > 0) {
+          graph.graphData(filtered);
+          pinLeadership();
+          applyTreeLayout(true);
+          graph.d3ReheatSimulation();
+          isFiltered = true;
+          resetBtn.style.display = "block";
+          filterHint.textContent = "Showing: " + node.name;
+        }
+        return;
+      }
+
       if (currentFilter === "none") {
         if (node.url) window.open(node.url, "_blank");
         return;
@@ -411,6 +439,7 @@
       if (filtered && filtered.nodes.length > 0) {
         graph.graphData(filtered);
         pinLeadership();
+        applyTreeLayout(currentFilter === "tree");
         graph.d3ReheatSimulation();
         isFiltered = true;
         resetBtn.style.display = "block";
@@ -429,6 +458,72 @@
   graph.d3Force("charge").strength(-200);
   graph.d3Force("link").distance(80);
 
+  var TREE_LAYER_SPACING = 120;
+
+  // Compute BFS depth from leadership for a set of nodes/links
+  function assignDepths(data) {
+    var adj = buildAdj(data);
+    var depthMap = {};
+    var root = adj[LEADERSHIP_ID] ? LEADERSHIP_ID : null;
+    if (!root) return depthMap;
+    var queue = [root];
+    depthMap[root] = 0;
+    while (queue.length > 0) {
+      var cur = queue.shift();
+      (adj[cur] || []).forEach(function (e) {
+        if (depthMap[e.neighbor] === undefined) {
+          depthMap[e.neighbor] = depthMap[cur] + 1;
+          queue.push(e.neighbor);
+        }
+      });
+    }
+    return depthMap;
+  }
+
+  function applyTreeLayout(enable) {
+    if (enable) {
+      var data = graph.graphData();
+      var depthMap = assignDepths(data);
+      data.nodes.forEach(function (n) {
+        n.__depth = depthMap[n.id] !== undefined ? depthMap[n.id] : 0;
+      });
+
+      // Straight top-down tree: pull nodes to y based on depth, center x
+      graph.d3Force("treeY", d3.forceY().y(function (n) {
+        return -200 + n.__depth * TREE_LAYER_SPACING;
+      }).strength(0.6));
+      graph.d3Force("treeX", d3.forceX().x(0).strength(0.02));
+      graph.d3Force("radial", null);
+      graph.d3Force("charge").strength(-300);
+      graph.d3Force("link").distance(TREE_LAYER_SPACING * 0.8);
+    } else {
+      graph.d3Force("treeY", null);
+      graph.d3Force("treeX", null);
+
+      // Fan leadership's direct children evenly around it
+      var data = graph.graphData();
+      var depthMap = assignDepths(data);
+      var depth1 = data.nodes.filter(function (n) { return depthMap[n.id] === 1; });
+      var angleStep = (2 * Math.PI) / Math.max(depth1.length, 1);
+      var depth1Angles = {};
+      depth1.forEach(function (n, i) {
+        depth1Angles[n.id] = -Math.PI / 2 + i * angleStep;
+      });
+      data.nodes.forEach(function (n) {
+        n.__angle = depth1Angles[n.id];
+      });
+
+      var FAN_RADIUS = 150;
+      graph.d3Force("radial", d3.forceRadial()
+        .radius(function (n) { return n.__angle !== undefined ? FAN_RADIUS : 0; })
+        .x(0).y(-200)
+        .strength(function (n) { return n.__angle !== undefined ? 0.3 : 0; })
+      );
+      graph.d3Force("charge").strength(-200);
+      graph.d3Force("link").distance(80);
+    }
+  }
+
   function pinLeadership() {
     var data = graph.graphData();
     data.nodes.forEach(function (n) {
@@ -442,6 +537,7 @@
   function showFullView() {
     graph.graphData(getBaseData());
     pinLeadership();
+    applyTreeLayout(currentFilter === "tree");
     graph.d3ReheatSimulation();
     isFiltered = false;
     resetBtn.style.display = "none";
@@ -470,9 +566,10 @@
   });
 
   resetBtn.addEventListener("click", function () {
+    currentFilter = "none";
+    document.getElementById("filter-select").value = "none";
+    filterHint.textContent = "";
     showFullView();
-    if (currentFilter === "local") filterHint.textContent = "Click a node to see neighbors.";
-    else if (currentFilter === "tree") filterHint.textContent = "Click a node to see its subtree.";
   });
 })();
 </script>
