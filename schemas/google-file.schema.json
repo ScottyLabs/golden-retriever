@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "google-file.schema.json",
+  "title": "Google File",
+  "description": "Schema for a Google file link registration.",
+  "type": "object",
+  "required": [
+    "name",
+    "slug",
+    "url"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable name for this file."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$",
+      "description": "URL-safe identifier. Must match the filename (without .json)."
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description of the file contents."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Direct URL to the Google file (Docs, Sheets, Slides, etc.)."
+    }
+  },
+  "additionalProperties": false
+}

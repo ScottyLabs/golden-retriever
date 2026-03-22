@@ -47,7 +47,7 @@ jobs:
       - name: Check JSON syntax
         run: |
           exit_code=0
-          for f in contributors/*.json repos/*.json figma-projects/*.json teams/*.json; do
+          for f in contributors/*.json repos/*.json figma-projects/*.json google-files/*.json teams/*.json; do
             [ -f "$f" ] || continue
             if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
               echo "::error file=$f::Invalid JSON syntax"
@@ -78,6 +78,14 @@ jobs:
           files=(figma-projects/*.json)
           if [ ${#files[@]} -gt 0 ]; then
             ajv validate -s schemas/figma-project.schema.json -d "figma-projects/*.json" --strict=false
+          fi
+
+      - name: Validate Google files against schema
+        run: |
+          shopt -s nullglob
+          files=(google-files/*.json)
+          if [ ${#files[@]} -gt 0 ]; then
+            ajv validate -s schemas/google-file.schema.json -d "google-files/*.json" --strict=false
           fi
 
       - name: Validate teams against schema
@@ -174,6 +182,14 @@ jobs:
                 exit_code=1
               fi
             done
+
+            # Check all google_files reference existing google-file files
+            for gf in $(python3 -c "import json; [print(g) for g in json.load(open('$team_file')).get('google_files', [])]"); do
+              if [ ! -f "google-files/$gf.json" ]; then
+                echo "::error file=$team_file::google_file '$gf' has no file at google-files/$gf.json"
+                exit_code=1
+              fi
+            done
           done
 
           # Check contributor slug matches filename
@@ -193,6 +209,17 @@ jobs:
             file_slug=$(python3 -c "import json; print(json.load(open('$repo_file'))['slug'])")
             if [ "$file_slug" != "$expected" ]; then
               echo "::error file=$repo_file::slug '$file_slug' does not match filename '$expected'"
+              exit_code=1
+            fi
+          done
+
+          # Check google-file slug matches filename
+          for gf_file in google-files/*.json; do
+            [ -f "$gf_file" ] || continue
+            expected=$(basename "$gf_file" .json)
+            file_slug=$(python3 -c "import json; print(json.load(open('$gf_file'))['slug'])")
+            if [ "$file_slug" != "$expected" ]; then
+              echo "::error file=$gf_file::slug '$file_slug' does not match filename '$expected'"
               exit_code=1
             fi
           done

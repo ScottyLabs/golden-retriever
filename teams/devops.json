@@ -21,6 +21,9 @@
   "figma_projects": [
     "devops-designs"
   ],
+  "google_files": [
+    "devops-runbook"
+  ],
   "sync_github": false,
   "sync_forgejo": false,
   "remove_unlisted": false

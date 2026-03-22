@@ -30,6 +30,16 @@ locals {
   }
 
   # ---------------------------------------------------------------------------
+  # Load Google file JSON files
+  # ---------------------------------------------------------------------------
+  google_file_files = fileset("${path.module}/google-files", "*.json")
+
+  google_files = {
+    for f in local.google_file_files :
+    trimsuffix(f, ".json") => jsondecode(file("${path.module}/google-files/${f}"))
+  }
+
+  # ---------------------------------------------------------------------------
   # Load team JSON files
   # ---------------------------------------------------------------------------
   team_files = fileset("${path.module}/teams", "*.json")

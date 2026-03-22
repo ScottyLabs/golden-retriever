@@ -19,6 +19,7 @@ jobs:
             contributors/**
             teams/**
             repos/**
+            google-files/**
 
       - name: Make scripts executable
         run: |

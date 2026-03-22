@@ -59,6 +59,15 @@
       "uniqueItems": true,
       "description": "Figma project filenames (without .json) from the figma-projects/ directory."
     },
+    "google_files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$"
+      },
+      "uniqueItems": true,
+      "description": "Google file slugs (without .json) from the google-files/ directory."
+    },
     "sync_github": {
       "type": "boolean",
       "default": true,

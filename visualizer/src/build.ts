@@ -24,6 +24,12 @@ interface FigmaProject {
   url?: string;
 }
 
+interface GoogleFile {
+  name: string;
+  slug: string;
+  url: string;
+}
+
 interface Team {
   name: string;
   slug: string;
@@ -32,12 +38,13 @@ interface Team {
   contributors: string[];
   repos?: string[];
   figma_projects?: string[];
+  google_files?: string[];
 }
 
 interface GraphNode {
   id: string;
   name: string;
-  nodeType: "Contributor" | "Team" | "Repo" | "Figma";
+  nodeType: "Contributor" | "Team" | "Repo" | "Figma" | "GFile";
   url?: string;
 }
 
@@ -70,6 +77,7 @@ function buildGraph(
   teams: Map<string, Team>,
   repos: Map<string, Repository>,
   figmaProjects: Map<string, FigmaProject>,
+  googleFiles: Map<string, GoogleFile>,
 ): Record<string, GraphData> {
   const allNodes: GraphNode[] = [];
   const allLinks: GraphLink[] = [];
@@ -107,6 +115,15 @@ function buildGraph(
     });
   }
 
+  for (const [slug, gf] of googleFiles) {
+    allNodes.push({
+      id: `gfile:${slug}`,
+      name: gf.name,
+      nodeType: "GFile",
+      url: gf.url,
+    });
+  }
+
   for (const [slug, t] of teams) {
     allNodes.push({
       id: `team:${slug}`,
@@ -139,6 +156,14 @@ function buildGraph(
         linkType: "team-figma",
       });
     }
+
+    for (const gf of t.google_files ?? []) {
+      allLinks.push({
+        source: `team:${slug}`,
+        target: `gfile:${gf}`,
+        linkType: "team-gfile",
+      });
+    }
   }
 
   const contributorOnlyNodes = allNodes.filter(
@@ -166,8 +191,9 @@ const contributors = loadJsonDir<Contributor>("contributors");
 const teams = loadJsonDir<Team>("teams");
 const repos = loadJsonDir<Repository>("repos");
 const figmaProjects = loadJsonDir<FigmaProject>("figma-projects");
+const googleFiles = loadJsonDir<GoogleFile>("google-files");
 
-const datasets = buildGraph(contributors, teams, repos, figmaProjects);
+const datasets = buildGraph(contributors, teams, repos, figmaProjects, googleFiles);
 const html = generateHtml(datasets);
 
 const distDir = join(WORKSPACE, "dist");

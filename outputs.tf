@@ -34,3 +34,8 @@ output "figma_project_count" {
   description = "Total number of registered Figma projects."
   value       = length(local.figma_projects)
 }
+
+output "google_file_count" {
+  description = "Total number of registered Google files."
+  value       = length(local.google_files)
+}

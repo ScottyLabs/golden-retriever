@@ -16,7 +16,7 @@ fmt-whitespace:
 # Pretty-print all JSON data files with consistent 2-space indentation.
 fmt-json:
 	@echo "==> Formatting JSON files..."
-	@for f in contributors/*.json repos/*.json figma-projects/*.json teams/*.json schemas/*.json; do \
+	@for f in contributors/*.json repos/*.json figma-projects/*.json google-files/*.json teams/*.json schemas/*.json; do \
 		[ -f "$$f" ] || continue; \
 		python3 -c "import json,pathlib;p=pathlib.Path('$$f');p.write_text(json.dumps(json.loads(p.read_text()),indent=2)+'\n')"; \
 	done
@@ -37,7 +37,7 @@ lint-editorconfig:
 
 lint-json:
 	@echo "==> Validating JSON schemas..."
-	@for f in contributors/*.json repos/*.json figma-projects/*.json teams/*.json; do \
+	@for f in contributors/*.json repos/*.json figma-projects/*.json google-files/*.json teams/*.json; do \
 		[ -f "$$f" ] || continue; \
 		python3 -m json.tool "$$f" > /dev/null; \
 	done
@@ -56,6 +56,7 @@ lint-refs:
 	teams = {f.removesuffix('.json'): json.load(open(os.path.join('teams', f))) for f in os.listdir('teams') if f.endswith('.json')}; \
 	repos = {f.removesuffix('.json') for f in os.listdir('repos') if f.endswith('.json')}; \
 	figma = {f.removesuffix('.json') for f in os.listdir('figma-projects') if f.endswith('.json')}; \
+	gfiles = {f.removesuffix('.json') for f in os.listdir('google-files') if f.endswith('.json')}; \
 	contribs = {f.removesuffix('.json') for f in os.listdir('contributors') if f.endswith('.json')}; \
 	[\
 		(print(f'ERROR: teams/{s}.json: slug {t[\"slug\"]!r} != filename {s!r}') or setattr(sys.modules[__name__], '_ok', False)) \
@@ -77,6 +78,10 @@ lint-refs:
 	[\
 		(print(f'ERROR: teams/{s}.json: figma_project {fp!r} not found') or setattr(sys.modules[__name__], '_ok', False)) \
 		for s, t in teams.items() for fp in t.get('figma_projects', []) if fp not in figma \
+	]; \
+	[\
+		(print(f'ERROR: teams/{s}.json: google_file {gf!r} not found') or setattr(sys.modules[__name__], '_ok', False)) \
+		for s, t in teams.items() for gf in t.get('google_files', []) if gf not in gfiles \
 	]; \
 	print('    All cross-references valid.') if ok else sys.exit(1); \
 	"
