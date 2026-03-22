@@ -1,0 +1,17 @@
+{
+  "name": "Corgi",
+  "slug": "corgi",
+  "description": "ScottyLabs component library, live at corgi.scottylabs.org.",
+  "maintainers": [
+    "kath45823"
+  ],
+  "contributors": [
+    "kath45823"
+  ],
+  "repos": [
+    "corgi"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": true
+}

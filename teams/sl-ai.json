@@ -1,0 +1,26 @@
+{
+  "name": "SLAI",
+  "slug": "sl-ai",
+  "description": "ScottyLabs AI team is responsible for cmuGPT, CMU Search, MCP server, and other AI-related projects. cmuGPT: Chatbot with ability to integrate with our own applications (CMU Eats, CMU Maps, CMU Courses). CMU Search: Our own search engine! Join if you love search engines! MCP Server: Wraps our own APIs, as an MCP server, used by cmuGPT.",
+  "maintainers": [
+    "ellylai",
+    "krishsaxena"
+  ],
+  "contributors": [
+    "ellylai",
+    "alanj268",
+    "krishsaxena",
+    "tsurbs"
+  ],
+  "repos": [
+    "cmugpt",
+    "cmusearch",
+    "cmugpt-frontend",
+    "mcp-server",
+    "cmugpt-agent",
+    "cmugpt-surface"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": true
+}

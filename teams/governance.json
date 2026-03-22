@@ -1,0 +1,19 @@
+{
+  "name": "Governance",
+  "slug": "governance",
+  "description": "Governance defines the organizational structure and manages permissions for ScottyLabs teams. Joining Governance means you want to work on the codebase inside the __meta/ directory.",
+  "maintainers": [
+    "Yuxiang-Huang",
+    "thesuperRL"
+  ],
+  "contributors": [
+    "Yuxiang-Huang",
+    "thesuperRL"
+  ],
+  "repos": [
+    "governance"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": true
+}

@@ -1,6 +1,5 @@
 {
   "name": "Infrastructure",
   "slug": "infrastructure",
-  "description": "Hosting and infrastructure configuration.",
   "forgejo": "ScottyLabs/infrastructure"
 }

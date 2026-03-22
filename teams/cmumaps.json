@@ -1,0 +1,38 @@
+{
+  "name": "CMU Maps",
+  "slug": "cmumaps",
+  "description": "CMU Maps is a web application that provides a map of the Carnegie Mellon University campus, allowing users to easily access information about campus locations, live at cmumaps.com.",
+  "maintainers": [
+    "Yuxiang-Huang",
+    "tsurbs",
+    "luke992",
+    "ellylai",
+    "romycyy",
+    "JettChenT"
+  ],
+  "contributors": [
+    "luke992",
+    "ellylai",
+    "romycyy",
+    "JettChenT",
+    "Yuxiang-Huang",
+    "tsurbs",
+    "Richard-31415",
+    "SayeVikram",
+    "tu2463",
+    "lastlegume",
+    "Jc-965",
+    "FarmerJohnsBessie",
+    "Wunwan",
+    "JeffreyYijiWang",
+    "JessCai06",
+    "Nicolapps"
+  ],
+  "repos": [
+    "cmumaps",
+    "secrets-sync-scripts"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": true
+}

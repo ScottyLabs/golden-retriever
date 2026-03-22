@@ -1,0 +1,44 @@
+{
+  "name": "Internal Tooling",
+  "slug": "internal-tooling",
+  "description": "Internal Tooling is a team that builds and maintains custom software to empower our ScottyLabs members and broader CMU community to operate efficiently and reliably.",
+  "maintainers": [
+    "TenType",
+    "ap-1",
+    "Yuxiang-Huang",
+    "maybe-yiyi"
+  ],
+  "contributors": [
+    "TenType",
+    "ap-1",
+    "Yuxiang-Huang",
+    "maybe-yiyi",
+    "sjskong",
+    "terrificjesse",
+    "Gostmeaper",
+    "Junsouh",
+    "stationedK-06",
+    "A-Speedy-Giraffe",
+    "jackhenri-welter",
+    "adrian-h-zhuang",
+    "pandaaured",
+    "Cometgerms",
+    "MaroonCoffee",
+    "EcstaticPilot",
+    "acluous",
+    "KothurVidur"
+  ],
+  "repos": [
+    "dalmatian",
+    "discord-verify",
+    "doberman",
+    "cmu-guide",
+    "secrets-sync-scripts",
+    "bus-sign",
+    "voting-app",
+    "cmuhousing"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": false
+}

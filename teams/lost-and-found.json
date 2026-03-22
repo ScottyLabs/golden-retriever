@@ -1,0 +1,20 @@
+{
+  "name": "Lost and Found",
+  "slug": "lost-and-found",
+  "description": "V3 Lost and Found Rewrite in Next (Copied from the repo description)",
+  "maintainers": [
+    "axgu",
+    "LeonLiu368"
+  ],
+  "contributors": [
+    "axgu",
+    "leonliu223",
+    "LeonLiu368"
+  ],
+  "repos": [
+    "lost-and-found"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": false
+}

@@ -1,0 +1,26 @@
+{
+  "name": "CMU Courses",
+  "slug": "cmucourses",
+  "description": "Web application to browse course information and build schedules",
+  "maintainers": [
+    "xavilien",
+    "ap-1",
+    "yl25946"
+  ],
+  "contributors": [
+    "xavilien",
+    "ap-1",
+    "yl25946",
+    "maybe-yiyi"
+  ],
+  "repos": [
+    "cmucourses",
+    "courses-frontend",
+    "courses-backend",
+    "courses-scraper",
+    "courses-api"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": false
+}

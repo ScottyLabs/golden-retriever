@@ -1,0 +1,35 @@
+{
+  "name": "Leadership",
+  "slug": "leadership",
+  "description": "Leadership refers to the official ScottyLabs Tech leadership team.",
+  "maintainers": [
+    "Yuxiang-Huang",
+    "ap-1",
+    "tsurbs",
+    "xavilien",
+    "scottylabs-bot"
+  ],
+  "contributors": [
+    "tsurbs",
+    "Yuxiang-Huang",
+    "JackHurew",
+    "ap-1",
+    "qianxuege",
+    "xavilien",
+    "yl25946",
+    "cirex-web",
+    "laasyaaki",
+    "luke992",
+    "ellylai",
+    "kath45823",
+    "axgu",
+    "TenType",
+    "thesuperRL",
+    "mzhou08",
+    "Adrastopoulos",
+    "scottylabs-bot"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": true
+}

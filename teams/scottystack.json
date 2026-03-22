@@ -1,0 +1,17 @@
+{
+  "name": "Scottystack",
+  "slug": "scottystack",
+  "description": "ScottyLabs Full Stack Template.",
+  "maintainers": [
+    "Yuxiang-Huang"
+  ],
+  "contributors": [
+    "Yuxiang-Huang"
+  ],
+  "repos": [
+    "scottystack"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": true
+}

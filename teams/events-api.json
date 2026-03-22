@@ -1,0 +1,17 @@
+{
+  "name": "Events API",
+  "slug": "events-api",
+  "description": "Events API provides API to CMU events data. Examples would include - 25live resevation data exposed via the CMU Maps API - Handshake and TartanHacks event data exposed via the CMU Cal API.",
+  "maintainers": [
+    "Yuxiang-Huang"
+  ],
+  "contributors": [
+    "Yuxiang-Huang"
+  ],
+  "repos": [
+    "events-scraper"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": true
+}

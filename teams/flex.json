@@ -1,0 +1,20 @@
+{
+  "name": "Flex",
+  "slug": "flex",
+  "description": "Flex team, short for Frontend Landing EXperience, is responsible for maintaining ScottyLabs's public-facing websites, including the main website at ScottyLabs.org, the TartanHacks landing page, and the Nova landing page.",
+  "maintainers": [
+    "cirex-web"
+  ],
+  "contributors": [
+    "cirex-web"
+  ],
+  "repos": [
+    "web",
+    "tartanhacks-landing-2026",
+    "nova",
+    "tartanhacks-old"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": false
+}

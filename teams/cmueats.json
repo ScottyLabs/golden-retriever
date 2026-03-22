@@ -1,0 +1,22 @@
+{
+  "name": "CMU Eats",
+  "slug": "cmueats",
+  "description": "CMU Eats keep track of the statuses of the various dining locations across Carnegie Mellon University. Quickly access the menus and specials at each location without having to go through the arduous process of visiting the CMU Dining Website. Live at cmueats.com.",
+  "maintainers": [
+    "cirex-web",
+    "laasyaaki"
+  ],
+  "contributors": [
+    "cirex-web",
+    "laasyaaki",
+    "michaeliuedu",
+    "cgaul26",
+    "stanleymw"
+  ],
+  "repos": [
+    "cmueats"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": false
+}

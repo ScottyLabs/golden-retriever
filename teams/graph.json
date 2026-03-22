@@ -1,0 +1,14 @@
+{
+  "name": "Graph",
+  "slug": "graph",
+  "description": "A social graph visualization of ScottyLabs.",
+  "maintainers": [
+    "Yuxiang-Huang"
+  ],
+  "contributors": [
+    "Yuxiang-Huang"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": false
+}

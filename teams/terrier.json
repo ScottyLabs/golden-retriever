@@ -1,0 +1,17 @@
+{
+  "name": "Terrier",
+  "slug": "terrier",
+  "description": "Terrier is a hackathon management platform written entirely in Rust. Going to be powering TartanHacks 2026!",
+  "maintainers": [
+    "ap-1"
+  ],
+  "contributors": [
+    "ap-1"
+  ],
+  "repos": [
+    "terrier"
+  ],
+  "sync_github": false,
+  "sync_forgejo": false,
+  "remove_unlisted": false
+}
