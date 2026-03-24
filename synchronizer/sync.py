@@ -249,9 +249,16 @@ def _sync_discord(
                 print(msg)
                 discord_log(f"**Governance sync** — role assign failed\n```{msg}```")
             else:
-                msg = f"Added Discord role for team ```{team_slug}``` on user ```{slug}```)"
+                msg = (
+                    f"OK: Discord role {rid} for user {uid} "
+                    f"(team {team_slug}, contributor {slug})"
+                )
                 print(msg)
-                discord_log(f"**Governance sync** — role assign succeeded\n```{msg}```")
+                # Avoid nested ``` inside the log body — Discord treats that as broken fences / empty posts.
+                discord_log(
+                    "**Governance sync** — role assign succeeded\n"
+                    f"Added role for team {team_slug} to contributor {slug} (user ID {uid}, role ID {rid})"
+                )
 
 
 def main() -> None:
