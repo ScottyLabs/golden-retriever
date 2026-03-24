@@ -39,6 +39,11 @@ terraform.rc
 # Visualizer build output
 dist/
 
+# Python (synchronizer / local tooling)
+__pycache__/
+*.py[cod]
+*.egg-info/
+
 # Node.js
 node_modules/
 

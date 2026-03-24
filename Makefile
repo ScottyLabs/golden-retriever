@@ -33,7 +33,7 @@ lint: lint-editorconfig lint-json lint-terraform lint-refs
 
 lint-editorconfig:
 	@echo "==> Checking EditorConfig compliance..."
-	@editorconfig-checker --exclude LICENSE --exclude '.terraform' --exclude 'scripts/secrets'
+	@editorconfig-checker --exclude LICENSE --exclude '.terraform' --exclude 'scripts/secrets' --exclude '__pycache__' --exclude '\.egg-info'
 
 lint-json:
 	@echo "==> Validating JSON schemas..."
