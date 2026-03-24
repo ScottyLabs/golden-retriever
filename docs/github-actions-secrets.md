@@ -74,6 +74,7 @@ Members must **already be in the Discord server** before the synchronizer can at
 
 Set repository **variable** `DISCORD_LOG_CHANNEL_ID` to a text channel’s numeric ID (Developer Mode → right-click channel → Copy Channel ID). The governance synchronizer workflow passes it as `DISCORD_LOG_CHANNEL_ID`. When set **and** `DISCORD_BOT_TOKEN` is set, the bot posts there when:
 
+- a Discord **role assignment succeeds** (each successful grant), or
 - a Discord **role assignment** fails (user not in server, missing permissions, HTTP errors, etc.), or
 - Discord sync is **skipped** because only one of `DISCORD_BOT_TOKEN` / `DISCORD_GUILD_ID` is configured.
 

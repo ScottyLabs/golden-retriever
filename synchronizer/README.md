@@ -40,7 +40,7 @@ With Discord:
 DISCORD_BOT_TOKEN=... DISCORD_GUILD_ID=... uv run sync
 ```
 
-Optional: send Discord-side failures to a text channel (bot needs Send Messages there):
+Optional: send Discord role sync activity (success and failure per assignment) to a text channel (bot needs Send Messages there):
 
 ```bash
 DISCORD_LOG_CHANNEL_ID=1234567890123456789 DISCORD_BOT_TOKEN=... DISCORD_GUILD_ID=... uv run sync

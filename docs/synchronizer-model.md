@@ -23,7 +23,7 @@ This document describes the intended synchronization behavior for maintainers.
 - reads each contributor's `discord_id` from `contributors/*.json`
 - grants the maintainer role to every maintainer (when `discord_roles.maintainer` is set) and the contributor role to every contributor (when `discord_roles.contributor` is set); maintainers receive both when both are set
 - requires `DISCORD_BOT_TOKEN` and `DISCORD_GUILD_ID` in the environment (see `docs/github-actions-secrets.md`)
-- optional `DISCORD_LOG_CHANNEL_ID`: when set with a valid bot token, posts messages to that channel for failed role assignments and Discord configuration problems
+- optional `DISCORD_LOG_CHANNEL_ID`: when set with a valid bot token, posts messages to that channel for each role assignment (success or failure) and for Discord configuration problems
 - additive only: does not remove roles when someone leaves a team in JSON
 
 ## Team schema fields used by synchronizer (today)

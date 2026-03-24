@@ -8,7 +8,7 @@ Use this checklist when onboarding a new maintainer or setting up a new reposito
    - `GH_OWNER`
    - `FORGEJO_HOST`
    - `FORGEJO_OWNER`
-   - `DISCORD_LOG_CHANNEL_ID` (optional — Discord text channel ID for governance sync failure posts; see `docs/github-actions-secrets.md`)
+   - `DISCORD_LOG_CHANNEL_ID` (optional — Discord text channel ID for governance sync role logs; see `docs/github-actions-secrets.md`)
 
 2. Add Terraform sync secrets:
    - `SYNC_GITHUB_TOKEN`
