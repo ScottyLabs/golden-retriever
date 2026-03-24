@@ -1,0 +1,77 @@
+# Governance-style synchronizer (Keycloak, Vault, Slack, Google Drive).
+# Mirrors env wiring from ScottyLabs/governance .github/workflows/sync.yml
+# https://github.com/ScottyLabs/governance/blob/main/.github/workflows/sync.yml
+#
+# Disabled until repository variable ENABLE_GOVERNANCE_SYNCHRONIZER == 'true'.
+# Requires synchronizer/pyproject.toml (or equivalent) — see docs/github-actions-secrets.md
+
+name: Governance Synchronizer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "contributors/**"
+      - "teams/**"
+      - "repos/**"
+      - "synchronizer/**"
+      - ".github/workflows/governance-synchronizer.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: governance-synchronizer
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Run governance synchronizer
+    runs-on: ubuntu-latest
+    if: vars.ENABLE_GOVERNANCE_SYNCHRONIZER == 'true'
+
+    env:
+      SYNC_GITHUB_TOKEN: ${{ secrets.SYNC_GITHUB_TOKEN }}
+      KEYCLOAK_SERVER_URL: ${{ secrets.KEYCLOAK_SERVER_URL }}
+      KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
+      KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+      KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
+      KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+      KEYCLOAK_USER_REALM: ${{ secrets.KEYCLOAK_USER_REALM }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+      GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
+      GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+      SCOTTYLABS_GOOGLE_DRIVE_ID: ${{ secrets.SCOTTYLABS_GOOGLE_DRIVE_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Check for synchronizer implementation
+        id: check
+        run: |
+          if [ -f synchronizer/pyproject.toml ]; then
+            echo "has_sync=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_sync=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Notice — no synchronizer yet
+        if: steps.check.outputs.has_sync != 'true'
+        run: |
+          echo "::notice::Add synchronizer/pyproject.toml and a sync entrypoint (uv run sync), or port ScottyLabs/governance __meta/synchronizer."
+          echo "See docs/github-actions-secrets.md for GitHub secrets."
+
+      - name: Set up uv
+        if: steps.check.outputs.has_sync == 'true'
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install and run synchronizer
+        if: steps.check.outputs.has_sync == 'true'
+        working-directory: synchronizer
+        run: |
+          uv sync --no-dev
+          uv pip install .
+          uv run --no-dev sync

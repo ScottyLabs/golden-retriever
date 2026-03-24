@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "team.schema.json",
   "title": "Team",
-  "description": "Schema for a team registration file.",
+  "description": "Schema for a team registration file. Extended fields mirror ScottyLabs governance synchronizer behavior; see docs/synchronizer-model.md.",
   "type": "object",
   "required": [
     "name",
@@ -67,6 +67,49 @@
       },
       "uniqueItems": true,
       "description": "Google file slugs (without .json) from the google-files/ directory."
+    },
+    "create_oidc_clients": {
+      "type": "boolean",
+      "description": "When true (default if omitted), a synchronizer creates Keycloak OIDC clients for local/dev/staging/prod. Set false to opt out (governance: create-oidc-clients)."
+    },
+    "website_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$",
+      "description": "Short site key for default OIDC redirect URI templates (api.<website_slug>.scottylabs.org, etc.). Should be set when create_oidc_clients is true."
+    },
+    "ext_admins": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "Contributor slugs (without .json) placed in the team's Keycloak/Vault external-admins group when present (governance: ext-admins)."
+    },
+    "applicants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "Contributor slugs for the applicants group (Keycloak/Vault applicants path) when present (governance: applicants)."
+    },
+    "secrets_population_layout": {
+      "type": "string",
+      "enum": [
+        "none",
+        "single",
+        "multi"
+      ],
+      "description": "HashiCorp Vault secrets folder layout for the team (governance: secrets-population-layout). Omit to follow synchronizer default."
+    },
+    "slack_channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "description": "Slack channel names (or IDs) for synchronizer invites (governance Slack section)."
     },
     "sync_github": {
       "type": "boolean",

@@ -26,7 +26,7 @@ jobs:
           sudo mv ec-linux-amd64 /usr/local/bin/editorconfig-checker
 
       - name: Check EditorConfig Compliance
-        run: editorconfig-checker --exclude LICENSE --exclude '.terraform'
+        run: editorconfig-checker --exclude LICENSE --exclude '.terraform' --exclude 'scripts/secrets'
 
   validate-json:
     name: Validate JSON Files
@@ -187,6 +187,22 @@ jobs:
             for gf in $(python3 -c "import json; [print(g) for g in json.load(open('$team_file')).get('google_files', [])]"); do
               if [ ! -f "google-files/$gf.json" ]; then
                 echo "::error file=$team_file::google_file '$gf' has no file at google-files/$gf.json"
+                exit_code=1
+              fi
+            done
+
+            # Check ext_admins reference existing contributor files
+            for x in $(python3 -c "import json; [print(v) for v in json.load(open('$team_file')).get('ext_admins', [])]"); do
+              if [ ! -f "contributors/$x.json" ]; then
+                echo "::error file=$team_file::ext_admin '$x' has no file at contributors/$x.json"
+                exit_code=1
+              fi
+            done
+
+            # Check applicants reference existing contributor files
+            for a in $(python3 -c "import json; [print(v) for v in json.load(open('$team_file')).get('applicants', [])]"); do
+              if [ ! -f "contributors/$a.json" ]; then
+                echo "::error file=$team_file::applicant '$a' has no file at contributors/$a.json"
                 exit_code=1
               fi
             done

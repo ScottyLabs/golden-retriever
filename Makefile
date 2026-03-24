@@ -33,7 +33,7 @@ lint: lint-editorconfig lint-json lint-terraform lint-refs
 
 lint-editorconfig:
 	@echo "==> Checking EditorConfig compliance..."
-	@editorconfig-checker --exclude LICENSE --exclude '.terraform'
+	@editorconfig-checker --exclude LICENSE --exclude '.terraform' --exclude 'scripts/secrets'
 
 lint-json:
 	@echo "==> Validating JSON schemas..."
@@ -82,6 +82,14 @@ lint-refs:
 	[\
 		(print(f'ERROR: teams/{s}.json: google_file {gf!r} not found') or setattr(sys.modules[__name__], '_ok', False)) \
 		for s, t in teams.items() for gf in t.get('google_files', []) if gf not in gfiles \
+	]; \
+	[ \
+		(print(f'ERROR: teams/{s}.json: ext_admin {x!r} not in contributors/') or setattr(sys.modules[__name__], '_ok', False)) \
+		for s, t in teams.items() for x in t.get('ext_admins', []) if x not in contribs \
+	]; \
+	[ \
+		(print(f'ERROR: teams/{s}.json: applicant {a!r} not in contributors/') or setattr(sys.modules[__name__], '_ok', False)) \
+		for s, t in teams.items() for a in t.get('applicants', []) if a not in contribs \
 	]; \
 	print('    All cross-references valid.') if ok else sys.exit(1); \
 	"

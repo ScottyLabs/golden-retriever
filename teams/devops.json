@@ -24,6 +24,7 @@
   "google_files": [
     "devops-runbook"
   ],
+  "create_oidc_clients": false,
   "sync_github": false,
   "sync_forgejo": false,
   "remove_unlisted": false

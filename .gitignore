@@ -41,3 +41,10 @@ dist/
 
 # Node.js
 node_modules/
+
+# Local env / secrets-sync-scripts (governance parity; never commit)
+.env
+.env.*
+!.env.example
+apps/**/.env
+apps/**/.env.*

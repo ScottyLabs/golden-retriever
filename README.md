@@ -1,8 +1,10 @@
 # golden-retriever
 
-Terraform-based governance system for managing contributors, teams, and repository access across **GitHub** and **Forgejo** (Codeberg), with **Figma** project and **Google file** tracking.
+Terraform-based governance system for managing contributors, teams, and repository access across **GitHub** and **Forgejo** (Codeberg), with **Figma** and **Google file** tracking.
 
-Members, repositories, Figma projects, Google files, and teams register themselves by adding JSON files to this repository. When applied, Terraform automatically syncs team memberships and repository permissions to the configured platforms. Figma projects are tracked for reference and verified via the Figma API in CI. Google files are stored as references only.
+Team JSON follows the same **synchronizer model** as [ScottyLabs/governance — `__meta/synchronizer/README.md`](https://github.com/ScottyLabs/governance/blob/main/__meta/synchronizer/README.md): GitHub teams/repos, **Keycloak** OIDC clients & groups, **HashiCorp Vault** layout, **Slack** channels, and leadership rules are documented in [`docs/synchronizer-model.md`](docs/synchronizer-model.md). **Terraform** here applies **GitHub** and **Forgejo**; other platforms are **declared** in team files for a future synchronizer or separate automation.
+
+Members, repositories, Figma projects, Google files, and teams register themselves by adding JSON files to this repository. When applied, Terraform syncs team memberships and repository permissions to the configured platforms. Figma projects are verified via the Figma API in CI where a token is configured. Google files are reference links only.
 
 ## How it works
 
@@ -10,8 +12,8 @@ Members, repositories, Figma projects, Google files, and teams register themselv
 2. **Repositories** add a JSON file to [`repos/`](repos/README.md) declaring which platforms they live on.
 3. **Figma projects** add a JSON file to [`figma-projects/`](figma-projects/README.md) with their Figma team and project IDs.
 4. **Google files** add a JSON file to [`google-files/`](google-files/README.md) with a link to the Google document.
-5. **Teams** add a JSON file to [`teams/`](teams/README.md) listing their members, maintainers, repo slugs, Figma project slugs, and Google file slugs.
-6. Terraform reads every JSON file, builds the desired state, and reconciles it with GitHub and/or Forgejo. Figma projects are verified via the read-only Figma API. Google files are stored as references only.
+5. **Teams** add a JSON file to [`teams/`](teams/README.md) listing members, maintainers, repos, optional Figma/Google slugs, and **synchronizer fields** (`create_oidc_clients`, `website_slug`, `secrets_population_layout`, `slack_channels`, etc.). See [`docs/synchronizer-model.md`](docs/synchronizer-model.md).
+6. Terraform reads JSON under `contributors/`, `repos/`, and `teams/`, and reconciles **GitHub** and/or **Forgejo**. Other synchronizer behaviors are specified for parity with governance.
 
 ### Permission model
 
@@ -22,9 +24,9 @@ Each team produces **two platform teams**:
 | `<slug>` | All contributors | `push` | `write` |
 | `<slug>-maintainers` | Maintainers only | `maintain` | `admin` |
 
-Platform permissions resolve to the **highest** grant, so maintainers (who appear in both teams) receive the elevated level.
+This mirrors governance’s **main team** + **Admins** sub-team; we use the `-maintainers` suffix in GitHub. Platform permissions resolve to the **highest** grant.
 
-> **Forgejo note:** The `svalabs/forgejo` provider does not yet support per-repo team assignments (`forgejo_team_repository`). Teams and memberships are fully managed, but repo-level access should be assigned via the Forgejo web UI or API until upstream support lands. Set `includes_all_repositories = true` in the Terraform resource if the team should access every org repo.
+> **Forgejo note:** The `svalabs/forgejo` provider does not yet support per-repo team assignments (`forgejo_team_repository`). Teams and memberships are fully managed, but repo-level access should be assigned via the Forgejo web UI or API until upstream support lands.
 
 ### Sync flags
 
@@ -34,6 +36,17 @@ Platform permissions resolve to the **highest** grant, so maintainers (who appea
 | `sync_forgejo` | `false` | Create Forgejo/Codeberg teams, memberships, and repo associations |
 
 Set a flag to `false` to opt a team out of a specific platform entirely.
+
+## Secrets, CI & local Vault (ScottyLabs parity)
+
+| What | Where |
+|------|--------|
+| **Terraform sync** (GitHub / Forgejo) | [`.github/workflows/sync.yml`](.github/workflows/sync.yml) — secrets `SYNC_GITHUB_TOKEN`, `FORGEJO_API_TOKEN`; variables `GITHUB_OWNER`, `FORGEJO_HOST`, `FORGEJO_OWNER`. |
+| **Governance synchronizer** (Keycloak, Vault, Slack, Google) | [`.github/workflows/governance-synchronizer.yml`](.github/workflows/governance-synchronizer.yml) — same secret **names** as [ScottyLabs/governance `sync.yml`](https://github.com/ScottyLabs/governance/blob/main/.github/workflows/sync.yml). Off until you set variable `ENABLE_GOVERNANCE_SYNCHRONIZER` = `true`. |
+| **Full secret list & setup** | [`docs/github-actions-secrets.md`](docs/github-actions-secrets.md) · [maintainer checklist](docs/maintainer-checklist-secrets.md) |
+| **Local `.env` ↔ Vault** | Git submodule [`scripts/secrets`](scripts/README.md) ([secrets-sync-scripts](https://github.com/ScottyLabs/secrets-sync-scripts)). Run `git submodule update --init --recursive` after clone. |
+
+**Never commit** `.env` or private keys; they are [gitignored](.gitignore).
 
 ## Quick start
 
@@ -79,7 +92,7 @@ Create `figma-projects/<slug>.json`:
 }
 ```
 
-> **Note:** The Figma API is read-only for permissions. CI will verify the project exists, but access must be granted manually in Figma.
+> **Note:** The Figma API is read-only for permissions. CI will verify the project exists when `FIGMA_TOKEN` is set.
 
 ### 4. Register a Google file (optional)
 
@@ -94,7 +107,7 @@ Create `google-files/<slug>.json`:
 }
 ```
 
-> **Note:** Permissions are not managed automatically. Access must be granted manually in Google.
+> **Note:** Permissions are not managed automatically in Google.
 
 ### 5. Register a team
 
@@ -110,10 +123,16 @@ Create `teams/<slug>.json`:
   "repos": ["my-project"],
   "figma_projects": ["my-project-designs"],
   "google_files": ["my-team-runbook"],
+  "create_oidc_clients": true,
+  "website_slug": "my-project",
+  "secrets_population_layout": "single",
+  "slack_channels": ["#my-project"],
   "sync_github": true,
   "sync_forgejo": false
 }
 ```
+
+Optional: `ext_admins`, `applicants`, `create_oidc_clients: false`, etc. — see [`teams/README.md`](teams/README.md) and [`docs/synchronizer-model.md`](docs/synchronizer-model.md).
 
 ### 6. Apply
 
@@ -145,6 +164,15 @@ terraform apply
 ```
 golden-retriever/
 ├── README.md
+├── docs/
+│   ├── synchronizer-model.md
+│   ├── github-actions-secrets.md
+│   └── keycloak-vault-credentials.md
+├── scripts/
+│   ├── README.md
+│   └── secrets/          # git submodule → secrets-sync-scripts
+├── synchronizer/
+│   └── README.md           # optional Python sync (future)
 ├── schemas/
 │   ├── contributor.schema.json
 │   ├── figma-project.schema.json
@@ -187,7 +215,6 @@ golden-retriever/
 Validate all data files against the schemas in [`schemas/`](schemas/):
 
 ```bash
-# Using ajv-cli or any JSON Schema validator
 npx ajv validate -s schemas/contributor.schema.json -d "contributors/*.json"
 npx ajv validate -s schemas/repository.schema.json -d "repos/*.json"
 npx ajv validate -s schemas/figma-project.schema.json -d "figma-projects/*.json"
