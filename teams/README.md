@@ -4,7 +4,7 @@
 
 Team files mirror the **[ScottyLabs governance synchronizer](https://github.com/ScottyLabs/governance/blob/main/__meta/synchronizer/README.md)** model (JSON / snake_case here). See **[Synchronizer model (full behavior)](../docs/synchronizer-model.md)** for GitHub, Keycloak, HashiCorp Vault, Slack, and leadership semantics.
 
-**Terraform** in this repo applies **GitHub** and **Forgejo** only today. Fields like `create_oidc_clients`, `slack_channels`, and `secrets_population_layout` are for a **future synchronizer** or other automation aligned with that README.
+**Terraform** in this repo applies **GitHub** and **Forgejo**. `slack_channels` is currently consumed by `synchronizer/sync.py` for auto-invites; fields like `create_oidc_clients` and `secrets_population_layout` are for additional synchronizer automation.
 
 Create a new JSON file in `teams/` with the team slug as the filename, e.g. `my-project.json`:
 

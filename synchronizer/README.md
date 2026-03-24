@@ -1,15 +1,31 @@
-# Governance synchronizer (optional)
+# Governance synchronizer
 
-This directory is reserved for a **Python synchronizer** that applies Keycloak, HashiCorp Vault, Slack, and Google Drive changes from `contributors/`, `teams/`, and `repos/` — the same role as [ScottyLabs/governance `__meta/synchronizer`](https://github.com/ScottyLabs/governance/tree/main/__meta/synchronizer).
+This directory contains synchronization code for systems outside Terraform-managed GitHub/Forgejo resources.
 
-## When you add code here
+## Current implementation
 
-1. Add **`pyproject.toml`** (recommended, with **`uv`**) and an entrypoint **`sync`** (e.g. `uv run sync`), matching [`.github/workflows/governance-synchronizer.yml`](../.github/workflows/governance-synchronizer.yml).
-2. Set repository variable **`ENABLE_GOVERNANCE_SYNCHRONIZER`** = `true`.
-3. Configure **GitHub Actions secrets** listed in [`docs/github-actions-secrets.md`](../docs/github-actions-secrets.md).
+`sync.py` currently provides Slack channel membership sync.
 
-Until `pyproject.toml` exists, the workflow exits successfully with a notice.
+What it does:
 
-## Terraform
+- reads `teams/*.json` `slack_channels`
+- resolves members from `maintainers` + `contributors`
+- uses `contributors/*.json` `slack_user_id`
+- invites users to channels (public and private)
 
-GitHub and Forgejo are already managed by **Terraform** in the repo root (`.github/workflows/sync.yml`). This synchronizer is for everything else in the [synchronizer model](../docs/synchronizer-model.md).
+Channel handling:
+
+- public channels: bot attempts `conversations.join`
+- private channels: bot must already be in the channel
+
+## Local run
+
+```bash
+cd synchronizer
+uv sync
+SLACK_TOKEN=xoxb-... uv run sync
+```
+
+## Extend in the future
+
+Add additional modules for Keycloak, Vault, Google, etc., and invoke them from `sync.py` while keeping idempotent behavior.

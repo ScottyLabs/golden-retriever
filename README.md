@@ -41,9 +41,9 @@ Set a flag to `false` to opt a team out of a specific platform entirely.
 
 | What | Where |
 |------|--------|
-| **Terraform sync** (GitHub / Forgejo) | [`.github/workflows/sync.yml`](.github/workflows/sync.yml) — secrets `SYNC_GITHUB_TOKEN`, `FORGEJO_API_TOKEN`; variables `GITHUB_OWNER`, `FORGEJO_HOST`, `FORGEJO_OWNER`. |
+| **Terraform sync** (GitHub / Forgejo) | [`.github/workflows/sync.yml`](.github/workflows/sync.yml) — secrets `SYNC_GITHUB_TOKEN`, `FORGEJO_API_TOKEN`; variables `GH_OWNER`, `FORGEJO_HOST`, `FORGEJO_OWNER`. |
 | **Governance synchronizer** (Keycloak, Vault, Slack, Google) | [`.github/workflows/governance-synchronizer.yml`](.github/workflows/governance-synchronizer.yml) — same secret **names** as [ScottyLabs/governance `sync.yml`](https://github.com/ScottyLabs/governance/blob/main/.github/workflows/sync.yml). Off until you set variable `ENABLE_GOVERNANCE_SYNCHRONIZER` = `true`. |
-| **Full secret list & setup** | [`docs/github-actions-secrets.md`](docs/github-actions-secrets.md) · [maintainer checklist](docs/maintainer-checklist-secrets.md) |
+| **Full secret list & maintainer setup** | [`docs/github-actions-secrets.md`](docs/github-actions-secrets.md) · [`docs/maintainer-checklist-secrets.md`](docs/maintainer-checklist-secrets.md) |
 | **Local `.env` ↔ Vault** | Git submodule [`scripts/secrets`](scripts/README.md) ([secrets-sync-scripts](https://github.com/ScottyLabs/secrets-sync-scripts)). Run `git submodule update --init --recursive` after clone. |
 
 **Never commit** `.env` or private keys; they are [gitignored](.gitignore).
@@ -172,7 +172,9 @@ golden-retriever/
 │   ├── README.md
 │   └── secrets/          # git submodule → secrets-sync-scripts
 ├── synchronizer/
-│   └── README.md           # optional Python sync (future)
+│   ├── README.md
+│   ├── pyproject.toml
+│   └── sync.py
 ├── schemas/
 │   ├── contributor.schema.json
 │   ├── figma-project.schema.json
