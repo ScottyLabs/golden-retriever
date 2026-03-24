@@ -2,7 +2,7 @@
 
 Terraform-based governance system for managing contributors, teams, and repository access across **GitHub** and **Forgejo** (Codeberg), with **Figma** and **Google file** tracking.
 
-Team JSON follows the same **synchronizer model** as [ScottyLabs/governance — `__meta/synchronizer/README.md`](https://github.com/ScottyLabs/governance/blob/main/__meta/synchronizer/README.md): GitHub teams/repos, **Keycloak** OIDC clients & groups, **HashiCorp Vault** layout, **Slack** channels, and leadership rules are documented in [`docs/synchronizer-model.md`](docs/synchronizer-model.md). **Terraform** here applies **GitHub** and **Forgejo**; other platforms are **declared** in team files for a future synchronizer or separate automation.
+Team JSON follows the same **synchronizer model** as [ScottyLabs/governance — `__meta/synchronizer/README.md`](https://github.com/ScottyLabs/governance/blob/main/__meta/synchronizer/README.md): GitHub teams/repos, **Keycloak** OIDC clients & groups, **HashiCorp Vault** layout, **Slack** channels, optional **Discord** roles, and leadership rules are documented in [`docs/synchronizer-model.md`](docs/synchronizer-model.md). **Terraform** here applies **GitHub** and **Forgejo**; other platforms are **declared** in team files for the Python synchronizer or separate automation.
 
 Members, repositories, Figma projects, Google files, and teams register themselves by adding JSON files to this repository. When applied, Terraform syncs team memberships and repository permissions to the configured platforms. Figma projects are verified via the Figma API in CI where a token is configured. Google files are reference links only.
 
@@ -12,7 +12,7 @@ Members, repositories, Figma projects, Google files, and teams register themselv
 2. **Repositories** add a JSON file to [`repos/`](repos/README.md) declaring which platforms they live on.
 3. **Figma projects** add a JSON file to [`figma-projects/`](figma-projects/README.md) with their Figma team and project IDs.
 4. **Google files** add a JSON file to [`google-files/`](google-files/README.md) with a link to the Google document.
-5. **Teams** add a JSON file to [`teams/`](teams/README.md) listing members, maintainers, repos, optional Figma/Google slugs, and **synchronizer fields** (`create_oidc_clients`, `website_slug`, `secrets_population_layout`, `slack_channels`, etc.). See [`docs/synchronizer-model.md`](docs/synchronizer-model.md).
+5. **Teams** add a JSON file to [`teams/`](teams/README.md) listing members, maintainers, repos, optional Figma/Google slugs, and **synchronizer fields** (`create_oidc_clients`, `website_slug`, `secrets_population_layout`, `slack_channels`, `sync_slack`, `discord_roles`, `sync_discord_roles`, etc.). See [`docs/synchronizer-model.md`](docs/synchronizer-model.md).
 6. Terraform reads JSON under `contributors/`, `repos/`, and `teams/`, and reconciles **GitHub** and/or **Forgejo**. Other synchronizer behaviors are specified for parity with governance.
 
 ### Permission model
@@ -42,7 +42,7 @@ Set a flag to `false` to opt a team out of a specific platform entirely.
 | What | Where |
 |------|--------|
 | **Terraform sync** (GitHub / Forgejo) | [`.github/workflows/sync.yml`](.github/workflows/sync.yml) — secrets `SYNC_GITHUB_TOKEN`, `FORGEJO_API_TOKEN`; variables `GH_OWNER`, `FORGEJO_HOST`, `FORGEJO_OWNER`. |
-| **Governance synchronizer** (Keycloak, Vault, Slack, Google) | [`.github/workflows/governance-synchronizer.yml`](.github/workflows/governance-synchronizer.yml) — same secret **names** as [ScottyLabs/governance `sync.yml`](https://github.com/ScottyLabs/governance/blob/main/.github/workflows/sync.yml). Off until you set variable `ENABLE_GOVERNANCE_SYNCHRONIZER` = `true`. |
+| **Governance synchronizer** (Keycloak, Vault, Slack, Discord, Google) | [`.github/workflows/governance-synchronizer.yml`](.github/workflows/governance-synchronizer.yml) — same secret **names** as [ScottyLabs/governance `sync.yml`](https://github.com/ScottyLabs/governance/blob/main/.github/workflows/sync.yml), plus optional Discord secrets and variable `DISCORD_LOG_CHANNEL_ID` (see [`docs/github-actions-secrets.md`](docs/github-actions-secrets.md)). Off until you set variable `ENABLE_GOVERNANCE_SYNCHRONIZER` = `true`. |
 | **Full secret list & maintainer setup** | [`docs/github-actions-secrets.md`](docs/github-actions-secrets.md) · [`docs/maintainer-checklist-secrets.md`](docs/maintainer-checklist-secrets.md) |
 | **Local `.env` ↔ Vault** | Git submodule [`scripts/secrets`](scripts/README.md) ([secrets-sync-scripts](https://github.com/ScottyLabs/secrets-sync-scripts)). Run `git submodule update --init --recursive` after clone. |
 

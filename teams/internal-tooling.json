@@ -38,6 +38,12 @@
     "voting-app",
     "cmuhousing"
   ],
+  "sync_slack": true,
+  "discord_roles": {
+    "maintainer": "1464729950673309857",
+    "contributor": "1464729950673309857"
+  },
+  "sync_discord_roles": true,
   "sync_github": false,
   "sync_forgejo": false,
   "remove_unlisted": false,

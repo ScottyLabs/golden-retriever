@@ -1,7 +1,7 @@
 [project]
 name = "golden-retriever-synchronizer"
 version = "0.1.0"
-description = "Governance synchronizer for Slack (public/private channel invites)"
+description = "Governance synchronizer for Slack (channel invites) and Discord (role grants)"
 requires-python = ">=3.11"
 dependencies = [
   "slack-sdk>=3.35.0",

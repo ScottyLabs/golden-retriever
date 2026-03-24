@@ -1,4 +1,4 @@
-# Governance-style synchronizer (Keycloak, Vault, Slack, Google Drive).
+# Governance-style synchronizer (Keycloak, Vault, Slack, Discord, Google Drive).
 # Mirrors env wiring from ScottyLabs/governance .github/workflows/sync.yml
 # https://github.com/ScottyLabs/governance/blob/main/.github/workflows/sync.yml
 #
@@ -39,6 +39,9 @@ jobs:
       KEYCLOAK_USER_REALM: ${{ secrets.KEYCLOAK_USER_REALM }}
       VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+      DISCORD_GUILD_ID: ${{ secrets.DISCORD_GUILD_ID }}
+      DISCORD_LOG_CHANNEL_ID: ${{ vars.DISCORD_LOG_CHANNEL_ID }}
       GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
       GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
       SCOTTYLABS_GOOGLE_DRIVE_ID: ${{ secrets.SCOTTYLABS_GOOGLE_DRIVE_ID }}

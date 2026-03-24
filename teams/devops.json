@@ -27,6 +27,12 @@
   "slack_channels": [
     "C096TM8EMS8"
   ],
+  "sync_slack": true,
+  "discord_roles": {
+    "maintainer": "1464729923041366354",
+    "contributor": "1464729923041366354"
+  },
+  "sync_discord_roles": true,
   "create_oidc_clients": false,
   "sync_github": false,
   "sync_forgejo": false,

@@ -111,6 +111,33 @@
       "uniqueItems": true,
       "description": "Slack channel names (or IDs) for synchronizer invites (governance Slack section)."
     },
+    "sync_slack": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true (default if omitted), the synchronizer invites this team's members to slack_channels when SLACK_TOKEN is set."
+    },
+    "discord_roles": {
+      "type": "object",
+      "description": "Discord role IDs (numeric snowflakes) for the synchronizer to grant to members who have discord_id on their contributor file. Bot must rank above these roles in Server Settings > Roles.",
+      "properties": {
+        "maintainer": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "description": "Role granted to every listed maintainer (in addition to contributor when that role is set)."
+        },
+        "contributor": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "description": "Role granted to every listed contributor."
+        }
+      },
+      "additionalProperties": false
+    },
+    "sync_discord_roles": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true (default if omitted), the synchronizer grants discord_roles when DISCORD_BOT_TOKEN and DISCORD_GUILD_ID are set."
+    },
     "sync_github": {
       "type": "boolean",
       "default": true,

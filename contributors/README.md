@@ -20,7 +20,7 @@ e.g. `your-github-username.json`:
 - `github_username` — Your GitHub username. Required if you are on any GitHub-synced team.
 - `forgejo_username` — Your Forgejo/Codeberg username. Required if you are on any Forgejo-synced team.
 - `slack_user_id` — Your Slack member ID (e.g. `U0123456789`). To find it, open your Slack profile, click the three dots, and select "Copy member ID."
-- `discord_id` — Your Discord user ID (numeric). Enable Developer Mode in Settings > Advanced, then right-click your name and select "Copy User ID."
+- `discord_id` — Your Discord user ID (numeric). Enable Developer Mode in Settings > Advanced, then right-click your name and select "Copy User ID." Used by the governance synchronizer when your teams define `discord_roles`; you must already be in the ScottyLabs Discord server for roles to apply.
 - `matrix_id` — Your Matrix/Element user ID in `@user:server` format (e.g. `@yourname:matrix.org`).
 
 See the [contributor schema](../schemas/contributor.schema.json) for full field definitions and validation rules.

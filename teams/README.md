@@ -4,7 +4,7 @@
 
 Team files mirror the **[ScottyLabs governance synchronizer](https://github.com/ScottyLabs/governance/blob/main/__meta/synchronizer/README.md)** model (JSON / snake_case here). See **[Synchronizer model (full behavior)](../docs/synchronizer-model.md)** for GitHub, Keycloak, HashiCorp Vault, Slack, and leadership semantics.
 
-**Terraform** in this repo applies **GitHub** and **Forgejo**. `slack_channels` is currently consumed by `synchronizer/sync.py` for auto-invites; fields like `create_oidc_clients` and `secrets_population_layout` are for additional synchronizer automation.
+**Terraform** in this repo applies **GitHub** and **Forgejo**. `slack_channels` and optional `discord_roles` are consumed by `synchronizer/sync.py` for Slack invites and Discord role grants; fields like `create_oidc_clients` and `secrets_population_layout` are for additional synchronizer automation.
 
 Create a new JSON file in `teams/` with the team slug as the filename, e.g. `my-project.json`:
 
@@ -36,6 +36,12 @@ Create a new JSON file in `teams/` with the team slug as the filename, e.g. `my-
   "applicants": [],
   "secrets_population_layout": "single",
   "slack_channels": ["#my-project"],
+  "sync_slack": true,
+  "discord_roles": {
+    "maintainer": "1234567890123456789",
+    "contributor": "9876543210987654321"
+  },
+  "sync_discord_roles": true,
   "sync_github": true,
   "sync_forgejo": false,
   "remove_unlisted": true
@@ -60,6 +66,9 @@ Create a new JSON file in `teams/` with the team slug as the filename, e.g. `my-
 | `applicants` | string[] | no | — | Contributor slugs for applicants group / Vault `applicants` path. |
 | `secrets_population_layout` | string | no | — | One of `none`, `single`, `multi` — HashiCorp Vault secrets tree. See synchronizer model doc. |
 | `slack_channels` | string[] | no | `[]` | Slack channels for synchronizer member invites. |
+| `sync_slack` | boolean | no | `true` | When false, synchronizer skips Slack invites for this team (Terraform unaffected). |
+| `discord_roles` | object | no | — | Optional `maintainer` and/or `contributor` keys: Discord role snowflake IDs. Requires `discord_id` on contributor files and synchronizer secrets; see `docs/github-actions-secrets.md`. |
+| `sync_discord_roles` | boolean | no | `true` | When false, synchronizer skips Discord role grants for this team. |
 | `sync_github` | boolean | no | `true` | Automatically sync membership and repo access to GitHub (Terraform). |
 | `sync_forgejo` | boolean | no | `false` | Automatically sync membership and repo access to Forgejo/Codeberg (Terraform). |
 | `remove_unlisted` | boolean | no | `true` | Remove members not listed in this file from the platform team. Set `false` during migration. |
