@@ -34,5 +34,9 @@
   ],
   "sync_github": false,
   "sync_forgejo": false,
-  "remove_unlisted": true
+  "remove_unlisted": true,
+  "slack_channels": [
+    "C05T7QRN4LF",
+    "C09F81J8XUL"
+  ]
 }

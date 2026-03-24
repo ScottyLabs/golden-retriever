@@ -40,5 +40,6 @@
   ],
   "sync_github": false,
   "sync_forgejo": false,
-  "remove_unlisted": false
+  "remove_unlisted": false,
+  "slack_channels": []
 }
