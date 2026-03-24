@@ -24,6 +24,9 @@
   "google_files": [
     "devops-runbook"
   ],
+  "slack_channels": [
+    "C096TM8EMS8"
+  ],
   "create_oidc_clients": false,
   "sync_github": false,
   "sync_forgejo": false,
